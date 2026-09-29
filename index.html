@@ -4,117 +4,100 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://generativelanguage.googleapis.com; frame-src https://*.supabase.co;">
-  <title>เตรียมสอบ ก.พ. — ล่าระดับ พิชิตข้อสอบ</title>
+  <title>กำลังทำข้อสอบ — เตรียมสอบ ก.พ.</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="navbar-inner">
-      <a href="index.html" class="navbar-brand">
-        <span class="brand-icon">⚔️</span>
-        เตรียมสอบ <span class="brand-accent">ก.พ.</span>
-      </a>
-      <div class="navbar-nav">
-        <a href="login.html">เข้าสู่ระบบ</a>
-        <a href="signup.html" class="btn btn-gold btn-sm">สมัครฟรี</a>
+  <!-- Loading -->
+  <div id="loading-screen" class="spinner-wrap">
+    <div class="spinner"></div>
+    <p class="text-secondary">กำลังเตรียมข้อสอบ...</p>
+  </div>
+
+  <!-- Not enough / error -->
+  <div id="not-enough-screen" class="hidden" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.25rem;">
+    <div class="card fade-up" style="padding:2rem;max-width:420px;text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:0.75rem;">🗝️</div>
+      <h2 class="mb-2">ไม่พบคำถามในคลัง</h2>
+      <p class="text-secondary text-sm mb-3">ขออภัย ขณะนี้ยังไม่มีคำถามเพียงพอสำหรับโหมดที่คุณเลือก</p>
+      <a href="dashboard.html" class="btn btn-gold btn-full">กลับไปเลือกโหมดอื่น</a>
+    </div>
+  </div>
+
+  <!-- Exam screen -->
+  <div id="exam-screen" class="hidden">
+    <header class="exam-header">
+      <h1 id="exam-mode-title" class="font-display" style="font-size:1.05rem;"></h1>
+      <div class="exam-timer" id="time-left">00:00</div>
+    </header>
+    <div class="exam-progress-bar">
+      <div id="exam-progress-fill" class="exam-progress-fill" style="width:0%;"></div>
+    </div>
+
+    <main class="container-md" style="padding: 2rem 1.25rem 3rem;">
+      <div class="card fade-up" style="padding:1.75rem;">
+
+        <!-- ═══ Context blocks (condition / passage / table) ═══ -->
+        <div id="context-container"></div>
+
+        <!-- ═══ Question ═══ -->
+        <div class="question-number-badge">
+          ⚔️ ข้อที่ <span id="current-question-number"></span> / <span id="total-questions"></span>
+        </div>
+
+        <div id="question-text" class="question-text"></div>
+
+        <div id="options-container"></div>
+
+        <div class="exam-action-bar" style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border-subtle);">
+          <button id="prev-button" class="btn btn-ghost" style="flex:1;min-width:140px;">← ก่อนหน้า</button>
+          <button id="skip-button" class="btn btn-outline" style="flex:1;min-width:140px;">✋ ข้ามข้อ</button>
+          <button id="exit-button" class="btn btn-outline" style="flex:1;min-width:140px;border-color:#f87171;color:#f87171;">🚪 ออกจากสอบ</button>
+          <button id="next-button" class="btn btn-gold" style="flex:1;min-width:140px;">ข้อต่อไป →</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Confirm submit modal -->
+  <div id="confirm-submit-modal" class="hidden modal-overlay">
+    <div class="modal-box">
+      <h3 class="modal-title">✅ ยืนยันการส่งคำตอบ</h3>
+      <p class="modal-desc">
+        คุณตอบไปแล้ว <strong class="text-gold" id="answered-count"></strong> จาก
+        <strong class="text-gold" id="modal-total-questions"></strong> ข้อ<br><br>
+        เมื่อส่งคำตอบแล้วจะไม่สามารถกลับมาแก้ไขได้ ยืนยันหรือไม่?
+      </p>
+      <div class="modal-actions">
+        <button id="cancel-submit-btn" class="btn btn-ghost">ยกเลิก</button>
+        <button id="confirm-submit-btn" class="btn btn-gold">ยืนยันส่งคำตอบ</button>
       </div>
     </div>
-  </nav>
+  </div>
 
-  <main>
-    <!-- Hero -->
-    <section class="container text-center fade-up" style="padding: 4rem 1.25rem 3rem;">
-      <div class="level-badge mb-2" style="font-size:0.85rem;">
-        ⚡ ระบบฝึกสอบแบบเกม — สะสม EXP, ปลดล็อกเลเวล
-      </div>
-      <h1 class="font-display mb-2" style="max-width:700px;margin-left:auto;margin-right:auto;">
-        พิชิตข้อสอบ ก.พ. <span class="text-gold">ทีละเลเวล</span>
-      </h1>
-      <p class="text-secondary" style="max-width:560px;margin:0 auto;font-size:1.05rem;">
-        ฝึกข้อสอบจริง 100 ข้อ หรือเลือกด่านตามหมวดหมู่/ปี พร้อมเฉลยละเอียด
-        ทุกข้อที่ทำถูกคือ EXP ที่เพิ่มขึ้น
+  <!-- Confirm exit modal -->
+  <div id="confirm-exit-modal" class="hidden modal-overlay">
+    <div class="modal-box">
+      <h3 class="modal-title">🚪 ยืนยันออกจากการสอบ</h3>
+      <p class="modal-desc">
+        คุณตอบไปแล้ว <strong id="exit-answered-count"></strong> จาก
+        <strong id="exit-total-questions"></strong> ข้อ<br><br>
+        <strong style="color:#f87171;">⚠️ หากออกจากการสอบ ข้อที่คุณตอบแล้วจะไม่ถูกบันทึก</strong><br>
+        ยืนยันว่าต้องการออกจากการสอบหรือไม่?
       </p>
-      <div class="flex justify-center gap-2 mt-3" style="flex-wrap:wrap;">
-        <a href="signup.html" class="btn btn-gold btn-lg">🚀 เริ่มภารกิจแรกฟรี</a>
-        <a href="login.html" class="btn btn-outline btn-lg">เข้าสู่ระบบ</a>
+      <div class="modal-actions">
+        <button id="cancel-exit-btn" class="btn btn-ghost">ยกเลิก</button>
+        <button id="confirm-exit-btn" class="btn btn-outline" style="border-color:#f87171;color:#f87171;">ออกจากการสอบ</button>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Feature cards -->
-    <section id="features" class="container" style="padding: 2rem 1.25rem 4rem;">
-      <div class="grid-3">
-        <div class="card fade-up fade-up-1" style="padding:1.75rem;">
-          <div class="stat-icon">📝</div>
-          <h3 class="mb-1" style="font-size:1.1rem;">ข้อสอบจริง 100 ข้อ</h3>
-          <p class="text-secondary text-sm">สุ่มจากคลังข้อสอบทั้งหมด พยายามไม่ออกข้อซ้ำที่คุณเคยทำไปแล้ว</p>
-        </div>
-        <div class="card fade-up fade-up-2" style="padding:1.75rem;">
-          <div class="stat-icon">🎯</div>
-          <h3 class="mb-1" style="font-size:1.1rem;">เลือกด่านเอง</h3>
-          <p class="text-secondary text-sm">แยกฝึกตามหมวดหมู่หรือปี เลือกจำนวนข้อ 10/25/50 ตามที่ต้องการ</p>
-        </div>
-        <div class="card fade-up fade-up-3" style="padding:1.75rem;">
-          <div class="stat-icon">🏆</div>
-          <h3 class="mb-1" style="font-size:1.1rem;">เฉลยละเอียด + EXP</h3>
-          <p class="text-secondary text-sm">ดูคำอธิบายทุกข้อ พร้อมสะสมคะแนนประสบการณ์ไต่เลเวลของคุณ</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section id="faq" class="container-md" style="padding: 1rem 1.25rem 5rem;">
-      <h2 class="text-center mb-3">คำถามที่พบบ่อย</h2>
-      <div id="faq-container" class="flex flex-col gap-2">
-        <div class="card">
-          <button class="faq-question" style="width:100%;text-align:left;padding:1rem 1.25rem;background:none;border:none;color:var(--text-primary);font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-body);font-size:0.95rem;">
-            <span>แอปพลิเคชันนี้ฟรีหรือไม่?</span>
-            <span class="text-gold" style="transition:transform 0.3s;">▸</span>
-          </button>
-          <div class="faq-answer text-secondary text-sm" style="padding:0 1.25rem;">
-            <p style="padding-bottom:1rem;">ใช่ครับ/ค่ะ เปิดให้ใช้งานได้ฟรี เพื่อสนับสนุนผู้ที่เตรียมตัวสอบ ก.พ. ทุกคน</p>
-          </div>
-        </div>
-        <div class="card">
-          <button class="faq-question" style="width:100%;text-align:left;padding:1rem 1.25rem;background:none;border:none;color:var(--text-primary);font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-body);font-size:0.95rem;">
-            <span>ระบบนี้เป็นระบบสอบจริงของสำนักงาน ก.พ. หรือไม่?</span>
-            <span class="text-gold" style="transition:transform 0.3s;">▸</span>
-          </button>
-          <div class="faq-answer text-secondary text-sm" style="padding:0 1.25rem;">
-            <p style="padding-bottom:1rem;">ไม่ใช่ครับ/ค่ะ ระบบนี้สร้างขึ้นเพื่อการฝึกฝนและศึกษาเท่านั้น ไม่มีความเกี่ยวข้องกับสำนักงาน ก.พ. แต่อย่างใด</p>
-          </div>
-        </div>
-        <div class="card">
-          <button class="faq-question" style="width:100%;text-align:left;padding:1rem 1.25rem;background:none;border:none;color:var(--text-primary);font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-body);font-size:0.95rem;">
-            <span>ข้อมูลส่วนตัวของฉันปลอดภัยหรือไม่?</span>
-            <span class="text-gold" style="transition:transform 0.3s;">▸</span>
-          </button>
-          <div class="faq-answer text-secondary text-sm" style="padding:0 1.25rem;">
-            <p style="padding-bottom:1rem;">ข้อมูลที่กรอก (ชื่อ, อีเมล, ประวัติการทำข้อสอบ) ถูกเก็บไว้เพื่อแสดงผลสถิติส่วนตัวของคุณเท่านั้น ไม่มีการเปิดเผยต่อบุคคลที่สาม</p>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer style="border-top:1px solid var(--border-subtle);padding:1.5rem;text-align:center;">
-    <p class="text-muted text-xs">© 2025 เตรียมสอบ ก.พ. — สร้างขึ้นเพื่อการศึกษาเท่านั้น</p>
-  </footer>
-
-  <script>
-    document.querySelectorAll(".faq-question").forEach((button) => {
-      button.addEventListener("click", () => {
-        const answer = button.nextElementSibling;
-        const icon = button.querySelector("span:last-child");
-        if (answer.style.maxHeight) {
-          answer.style.maxHeight = null;
-          icon.style.transform = "rotate(0deg)";
-        } else {
-          answer.style.maxHeight = answer.scrollHeight + "px";
-          icon.style.transform = "rotate(90deg)";
-        }
-      });
-    });
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth-guard.js"></script>
+  <script src="js/exam-engine.js"></script>
+  <script src="js/exam.js"></script>
 </body>
 </html>
