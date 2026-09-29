@@ -1,18 +1,15 @@
 // js/exam-engine.js
-// ตรรกะหลักของการสุ่มข้อสอบและบันทึกผล (ใช้ร่วมกันทุกโหมด) — Supabase เวอร์ชัน
+// ตรรกะการสุ่มข้อสอบและบันทึกผล (Supabase)
 
 /**
- * ดึงคำถามทั้งหมดที่ active ตามเงื่อนไข filter (categoryId / examYearId)
- * ข้อที่ถูก soft-delete (deleted_at != null) จะไม่ถูกดึง
- * filter = { categoryId: string|null, examYearId: string|null }
+ * ดึงคำถามที่ active ตามเงื่อนไข
  */
 async function fetchActiveQuestions(filter = {}) {
   return withRetry(async () => {
     let query = sb
       .from("questions")
       .select("*")
-      .eq("is_active", true)
-      .is("deleted_at", null); // ← เพิ่มเงื่อนไข: ข้อที่ยังไม่ถูกลบ
+      .eq("is_active", true);
 
     if (filter.categoryId) {
       query = query.eq("category_id", filter.categoryId);
@@ -28,11 +25,10 @@ async function fetchActiveQuestions(filter = {}) {
 }
 
 /**
- * โหลด set ของ "ข้อที่เคยเจอแล้ว" ของผู้ใช้คนนี้
+ * โหลด set ของ "ข้อที่เคยเจอแล้ว"
  */
 async function getSeenQuestionIds(uid) {
   return withRetry(async () => {
-    // ใช้ maybeSingle() เพราะผู้ใช้ใหม่จะยังไม่มีแถวนี้เลย (ไม่ใช่ error)
     const { data, error } = await sb
       .from("user_seen_questions")
       .select("seen_question_ids")
@@ -45,7 +41,7 @@ async function getSeenQuestionIds(uid) {
 }
 
 /**
- * บันทึกข้อที่ออกในรอบนี้เข้า "ประวัติข้อที่เคยเจอ" ของผู้ใช้ (merge ไม่ให้ซ้ำ)
+ * บันทึกข้อที่ออกในรอบนี้ (merge ไม่ให้ซ้ำ)
  */
 async function markQuestionsAsSeen(uid, questionIds) {
   return withRetry(async () => {
@@ -67,13 +63,7 @@ async function markQuestionsAsSeen(uid, questionIds) {
 }
 
 /**
- * สุ่ม n ข้อ โดยพยายามเลี่ยงข้อที่ผู้ใช้เคยเจอมาแล้วก่อน
- * ถ้าข้อที่ยังไม่เคยเจอมีไม่พอ จะ fallback สุ่มเติมจากข้อที่เคยเจอแล้ว
- *
- * @param {string} uid
- * @param {number} count จำนวนข้อที่ต้องการ
- * @param {object} filter { categoryId, examYearId } — ส่ง null ทั้งคู่ถ้าต้องการสุ่มจากทั้งคลัง
- * @returns {Promise<{questions: Array, usedFallback: boolean}>}
+ * สุ่ม n ข้อ โดยเลี่ยงข้อที่เคยเจอ ถ้าไม่พอใช้ fallback
  */
 async function drawQuestionsNoRepeat(uid, count, filter = {}) {
   return withRetry(async () => {
@@ -89,7 +79,6 @@ async function drawQuestionsNoRepeat(uid, count, filter = {}) {
     if (unseen.length >= count) {
       selected = sampleArray(unseen, count);
     } else {
-      // ใช้ข้อที่ยังไม่เคยเจอทั้งหมดก่อน แล้วเติมจากข้อที่เคยเจอแล้ว
       selected = unseen.slice();
       const remaining = count - unseen.length;
       if (remaining > 0 && seen.length > 0) {
@@ -103,7 +92,7 @@ async function drawQuestionsNoRepeat(uid, count, filter = {}) {
 }
 
 /**
- * บันทึก attempt ใหม่ตอนเริ่มทำข้อสอบ (ก่อนตอบ) คืน attemptId
+ * บันทึก attempt ใหม่ตอนเริ่มทำข้อสอบ
  */
 async function createExamAttempt({ userId, mode, categoryId = null, examYearId = null, questionIds }) {
   return withRetry(async () => {
@@ -129,7 +118,7 @@ async function createExamAttempt({ userId, mode, categoryId = null, examYearId =
 }
 
 /**
- * บันทึกผลตอนทำข้อสอบเสร็จ + อัปเดตสถิติผู้ใช้ + อัปเดต seen questions
+ * บันทึกผลตอนทำข้อสอบเสร็จ
  */
 async function finishExamAttempt({ attemptId, userId, userAnswers, questions, durationSeconds }) {
   return withRetry(async () => {
@@ -153,7 +142,6 @@ async function finishExamAttempt({ attemptId, userId, userAnswers, questions, du
 
     if (updateAttemptError) throw updateAttemptError;
 
-    // อัปเดตสถิติผู้ใช้ + คำนวณ EXP ที่ได้รับจากรอบนี้ (10 EXP ต่อข้อที่ตอบถูก)
     const { data: profile, error: profileFetchError } = await sb
       .from("profiles")
       .select("total_attempts, best_score, total_exp")
@@ -183,7 +171,6 @@ async function finishExamAttempt({ attemptId, userId, userAnswers, questions, du
 
     if (profileUpdateError) throw profileUpdateError;
 
-    // บันทึกว่าข้อเหล่านี้ "เคยเจอแล้ว" (เฉพาะโหมด full100 ตามที่ออกแบบไว้ เพื่อกันสุ่มซ้ำข้าม)
     await markQuestionsAsSeen(userId, questions.map((q) => q.id));
 
     return {
