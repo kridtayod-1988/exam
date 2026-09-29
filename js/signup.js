@@ -1,14 +1,22 @@
 // js/signup.js
-// ตรรกะหน้าสมัครสมาชิก: ขั้นที่ 1 กรอกข้อมูล + ยอมรับคำชี้แจง → ขั้นที่ 2 ยืนยันก่อนสมัครจริง
+// สมัครสมาชิก 2 ขั้น + init button style
 
 redirectIfAuthenticated("dashboard.html");
 
-let pendingSignupData = null; // เก็บข้อมูลที่ผ่านขั้น 1 รอยืนยันในขั้น 2
+let pendingSignupData = null;
 
 const checkbox = document.getElementById("signup-agree-checkbox");
 const step1Btn = document.getElementById("signup-step1-btn");
 
-// ปุ่ม "ถัดไป" จะ enable ก็ต่อเมื่อติ๊กยอมรับคำชี้แจงแล้วเท่านั้น
+// ตั้งค่า style เริ่มต้นให้ปุ่ม disabled
+(function initializeStep1Button() {
+  step1Btn.disabled = true;
+  step1Btn.classList.remove("btn-gold");
+  step1Btn.style.background = "var(--surface-3)";
+  step1Btn.style.color = "var(--text-muted)";
+  step1Btn.style.cursor = "not-allowed";
+})();
+
 checkbox.addEventListener("change", () => {
   if (checkbox.checked) {
     step1Btn.disabled = false;
@@ -61,10 +69,8 @@ document.getElementById("signup-form-step1").addEventListener("submit", (e) => {
     return;
   }
 
-  // เก็บข้อมูลไว้รอยืนยันในขั้นที่ 2 (ยังไม่สร้างบัญชีจริง)
   pendingSignupData = { displayName, email, password };
 
-  // อัปเดต preview ในหน้ายืนยัน (ใช้ textContent ป้องกัน XSS เสมอ)
   document.getElementById("confirm-name").textContent = displayName;
   document.getElementById("confirm-email").textContent = email;
 
@@ -86,8 +92,6 @@ document.getElementById("signup-confirm-btn").addEventListener("click", async ()
   confirmBtn.textContent = "กำลังสมัครสมาชิก...";
 
   try {
-    // ส่ง display_name ผ่าน metadata — trigger "on_auth_user_created" ฝั่งฐานข้อมูล
-    // จะอ่านค่านี้ไปสร้างแถวใน profiles ให้อัตโนมัติ ไม่ต้อง insert เองที่ client
     const { data, error } = await sb.auth.signUp({
       email: pendingSignupData.email,
       password: pendingSignupData.password,
@@ -99,10 +103,8 @@ document.getElementById("signup-confirm-btn").addEventListener("click", async ()
     if (error) throw error;
 
     if (data.session) {
-      // โปรเจกต์นี้ปิดการยืนยันอีเมล (confirm email off) → ล็อกอินอัตโนมัติทันที
       window.location.href = "dashboard.html";
     } else {
-      // ค่าเริ่มต้นของ Supabase: ต้องกดยืนยันลิงก์ในอีเมลก่อนถึงจะล็อกอินได้
       const successStep = document.getElementById("signup-step-2");
       successStep.innerHTML = `
         <div class="text-center">
