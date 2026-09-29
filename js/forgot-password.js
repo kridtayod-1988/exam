@@ -6,7 +6,7 @@ document.getElementById("forgot-form").addEventListener("submit", async (e) => {
 
   const errorBanner = document.getElementById("error-banner");
   const successBanner = document.getElementById("success-banner");
-  errorBanner.classList.add("hidden");
+  errorBanner.classList.add("idden");
   successBanner.classList.add("hidden");
 
   const email = document.getElementById("forgot-email").value.trim();
