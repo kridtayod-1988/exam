@@ -1,8 +1,10 @@
 // js/dashboard.js
 
 let dashboardUser = null;
-let selectedCategoryCount = 25;
-let selectedYearCount = 25;
+
+// จำนวนข้อคงที่สำหรับโหมดแยกหมวดหมู่/ปี
+const DEFAULT_CATEGORY_COUNT = 25;
+const DEFAULT_YEAR_COUNT = 25;
 
 (async function init() {
   try {
@@ -22,7 +24,6 @@ let selectedYearCount = 25;
     await loadSystemConfig();
     await loadCategories();
     await loadExamYears();
-    setupCountButtons();
   } catch (err) {
     console.error("เกิดข้อผิดพลาดตอนโหลดหน้า dashboard:", err);
   }
@@ -114,26 +115,6 @@ async function loadExamYears() {
   }
 }
 
-function setupCountButtons() {
-  // Category count group
-  document.querySelectorAll("#category-count-group .count-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("#category-count-group .count-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedCategoryCount = parseInt(btn.dataset.count, 10);
-    });
-  });
-
-  // Year count group
-  document.querySelectorAll("#year-count-group .count-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("#year-count-group .count-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      selectedYearCount = parseInt(btn.dataset.count, 10);
-    });
-  });
-}
-
 // ----- เริ่มข้อสอบจริง 100 ข้อ -----
 document.getElementById("start-full-exam-btn").addEventListener("click", () => {
   sessionStorage.setItem("examConfig", JSON.stringify({ mode: "full100" }));
@@ -149,7 +130,11 @@ document.getElementById("start-category-exam-btn").addEventListener("click", () 
   }
   sessionStorage.setItem(
     "examConfig",
-    JSON.stringify({ mode: "category", categoryId, count: selectedCategoryCount })
+    JSON.stringify({
+      mode: "category",
+      categoryId,
+      count: DEFAULT_CATEGORY_COUNT
+    })
   );
   window.location.href = "exam.html";
 });
@@ -163,7 +148,11 @@ document.getElementById("start-year-exam-btn").addEventListener("click", () => {
   }
   sessionStorage.setItem(
     "examConfig",
-    JSON.stringify({ mode: "year", examYearId, count: selectedYearCount })
+    JSON.stringify({
+      mode: "year",
+      examYearId,
+      count: DEFAULT_YEAR_COUNT
+    })
   );
   window.location.href = "exam.html";
 });
