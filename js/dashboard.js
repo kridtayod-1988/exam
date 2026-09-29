@@ -1,7 +1,8 @@
 // js/dashboard.js
-// ปรับ dashboard ให้เลือกโหมดแยกหมวดหมู่/ปีโดยตรง โดยไม่เลือกจำนวนข้อ
 
 let dashboardUser = null;
+let selectedCategoryCount = 25;
+let selectedYearCount = 25;
 
 (async function init() {
   try {
@@ -21,6 +22,7 @@ let dashboardUser = null;
     await loadSystemConfig();
     await loadCategories();
     await loadExamYears();
+    setupCountButtons();
   } catch (err) {
     console.error("เกิดข้อผิดพลาดตอนโหลดหน้า dashboard:", err);
   }
@@ -58,7 +60,6 @@ async function loadCategories() {
         .from("categories")
         .select("id, name")
         .eq("is_active", true)
-        .is("deleted_at", null)
         .order("sort_order", { ascending: true }),
       { operationName: "loadCategories" }
     );
@@ -73,7 +74,7 @@ async function loadCategories() {
     data.forEach((row) => {
       const option = document.createElement("option");
       option.value = row.id;
-      option.textContent = row.name; // textContent ปลอดภัยจาก XSS
+      option.textContent = row.name;
       select.appendChild(option);
     });
   } catch (err) {
@@ -113,13 +114,33 @@ async function loadExamYears() {
   }
 }
 
+function setupCountButtons() {
+  // Category count group
+  document.querySelectorAll("#category-count-group .count-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#category-count-group .count-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedCategoryCount = parseInt(btn.dataset.count, 10);
+    });
+  });
+
+  // Year count group
+  document.querySelectorAll("#year-count-group .count-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#year-count-group .count-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedYearCount = parseInt(btn.dataset.count, 10);
+    });
+  });
+}
+
 // ----- เริ่มข้อสอบจริง 100 ข้อ -----
 document.getElementById("start-full-exam-btn").addEventListener("click", () => {
   sessionStorage.setItem("examConfig", JSON.stringify({ mode: "full100" }));
   window.location.href = "exam.html";
 });
 
-// ----- เริ่มข้อสอบแยกหมวดหมู่ (ไม่เลือกจำนวน) -----
+// ----- เริ่มข้อสอบแยกหมวดหมู่ -----
 document.getElementById("start-category-exam-btn").addEventListener("click", () => {
   const categoryId = document.getElementById("category-select").value;
   if (!categoryId) {
@@ -128,12 +149,12 @@ document.getElementById("start-category-exam-btn").addEventListener("click", () 
   }
   sessionStorage.setItem(
     "examConfig",
-    JSON.stringify({ mode: "category", categoryId, count: 25 }) // ค่าตั้งต้น 25 ข้อ
+    JSON.stringify({ mode: "category", categoryId, count: selectedCategoryCount })
   );
   window.location.href = "exam.html";
 });
 
-// ----- เริ่มข้อสอบแยกปี (ไม่เลือกจำนวน) -----
+// ----- เริ่มข้อสอบแยกปี -----
 document.getElementById("start-year-exam-btn").addEventListener("click", () => {
   const examYearId = document.getElementById("year-select").value;
   if (!examYearId) {
@@ -142,7 +163,7 @@ document.getElementById("start-year-exam-btn").addEventListener("click", () => {
   }
   sessionStorage.setItem(
     "examConfig",
-    JSON.stringify({ mode: "year", examYearId, count: 25 }) // ค่าตั้งต้น 25 ข้อ
+    JSON.stringify({ mode: "year", examYearId, count: selectedYearCount })
   );
   window.location.href = "exam.html";
 });
