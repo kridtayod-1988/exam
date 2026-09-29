@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://wefgreavazpfctayjnmp.supabase.co;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://generativelanguage.googleapis.com; frame-src https://*.supabase.co;">
   <title>เลือกภารกิจ — เตรียมสอบ ก.พ.</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -72,6 +72,7 @@
           <option value="">กำลังโหลด...</option>
         </select>
       </div>
+
       <button id="start-category-exam-btn" class="btn btn-outline btn-full mt-3">
         เริ่มฝึกตามหมวดหมู่
       </button>
@@ -93,6 +94,7 @@
           <option value="">กำลังโหลด...</option>
         </select>
       </div>
+
       <button id="start-year-exam-btn" class="btn btn-outline btn-full mt-3">
         เริ่มฝึกตามปีข้อสอบ
       </button>
