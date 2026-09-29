@@ -3,33 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://wefgreavazpfctayjnmp.supabase.co;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://generativelanguage.googleapis.com; frame-src https://*.supabase.co;">
   <title>กำลังทำข้อสอบ — เตรียมสอบ ก.พ.</title>
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    .exam-action-bar {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      margin-top: 1.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border-subtle);
-    }
-    .exam-action-bar .btn {
-      flex: 1;
-      min-width: 140px;
-    }
-  </style>
 </head>
 <body>
 
-  <!-- หน้าจอกำลังโหลด -->
+  <!-- Loading -->
   <div id="loading-screen" class="spinner-wrap">
     <div class="spinner"></div>
     <p class="text-secondary">กำลังเตรียมข้อสอบ...</p>
   </div>
 
-  <!-- หน้าจอแจ้งเตือนถ้าคลังคำถามไม่พอ -->
+  <!-- Not enough / error -->
   <div id="not-enough-screen" class="hidden" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.25rem;">
     <div class="card fade-up" style="padding:2rem;max-width:420px;text-align:center;">
       <div style="font-size:2.5rem;margin-bottom:0.75rem;">🗝️</div>
@@ -39,49 +25,59 @@
     </div>
   </div>
 
-  <!-- หน้าจอทำข้อสอบหลัก -->
+  <!-- Exam screen -->
   <div id="exam-screen" class="hidden">
+
+    <!-- ═══ Header: ซ้าย=ชื่อโหมด / ขวา=timer + ปุ่มออก ═══ -->
     <header class="exam-header">
-      <h1 id="exam-mode-title" class="font-display" style="font-size:1.05rem;"></h1>
-      <div class="exam-timer" id="time-left">00:00</div>
+      <h1 id="exam-mode-title" class="font-display exam-header-title"></h1>
+
+      <div class="exam-header-actions">
+        <div class="exam-timer" id="time-left">00:00</div>
+
+        <button id="exit-button" type="button" class="exam-exit-btn" title="ออกจากการสอบ" aria-label="ออกจากการสอบ">
+          <span class="exam-exit-icon">🚪</span>
+          <span class="exam-exit-text">ออก</span>
+        </button>
+      </div>
     </header>
+
     <div class="exam-progress-bar">
       <div id="exam-progress-fill" class="exam-progress-fill" style="width:0%;"></div>
     </div>
 
-    <main class="container-md" style="padding: 2rem 1.25rem;">
+    <main class="container-md" style="padding: 2rem 1.25rem 3rem;">
       <div class="card fade-up" style="padding:1.75rem;">
+
+        <!-- ═══ Context blocks ═══ -->
+        <div id="context-container"></div>
+
+        <!-- ═══ Question ═══ -->
         <div class="question-number-badge">
-          ⚔️ ข้อที่ <span id="current-question-number"></span> / <span id="total-questions"></span>
+          ⚔️ ข้อที่ <span id="current-question-number">1</span> / <span id="total-questions">0</span>
         </div>
 
-        <!-- คำถาม (ใส่ผ่าน textContent เท่านั้น) -->
         <div id="question-text" class="question-text"></div>
-
-        <!-- ตารางข้อมูลประกอบคำถาม (ถ้ามี) -->
-        <div id="question-table-container" class="hidden" style="overflow-x:auto;">
-          <table class="question-table" id="question-table"></table>
-        </div>
 
         <div id="options-container"></div>
 
+        <!-- ═══ Action bar (ลบปุ่มออกออกแล้ว) ═══ -->
         <div class="exam-action-bar">
-          <button id="prev-button" class="btn btn-ghost">← ก่อนหน้า</button>
-          <button id="skip-button" class="btn btn-outline">✋ ข้ามข้อ</button>
-          <button id="exit-button" class="btn btn-outline" style="border-color:#f87171;color:#f87171;">🚪 ออกจากสอบ</button>
-          <button id="next-button" class="btn btn-gold">ข้อต่อไป →</button>
+          <button id="prev-button" type="button" class="btn btn-ghost" style="flex:1;min-width:120px;">← ก่อนหน้า</button>
+          <button id="skip-button" type="button" class="btn btn-outline" style="flex:1;min-width:120px;">✋ ข้ามข้อ</button>
+          <button id="next-button" type="button" class="btn btn-gold" style="flex:1;min-width:120px;">ข้อต่อไป →</button>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Modal ยืนยันก่อนส่งคำตอบ -->
+  <!-- Confirm submit modal -->
   <div id="confirm-submit-modal" class="hidden modal-overlay">
     <div class="modal-box">
       <h3 class="modal-title">✅ ยืนยันการส่งคำตอบ</h3>
       <p class="modal-desc">
-        คุณตอบไปแล้ว <strong class="text-gold" id="answered-count"></strong> จาก
-        <strong class="text-gold" id="modal-total-questions"></strong> ข้อ<br><br>
+        คุณตอบไปแล้ว <strong class="text-gold" id="answered-count">0</strong> จาก
+        <strong class="text-gold" id="modal-total-questions">0</strong> ข้อ<br><br>
         เมื่อส่งคำตอบแล้วจะไม่สามารถกลับมาแก้ไขได้ ยืนยันหรือไม่?
       </p>
       <div class="modal-actions">
@@ -91,13 +87,13 @@
     </div>
   </div>
 
-  <!-- Modal ยืนยันก่อนออกจากการสอบ -->
+  <!-- Confirm exit modal -->
   <div id="confirm-exit-modal" class="hidden modal-overlay">
     <div class="modal-box">
       <h3 class="modal-title">🚪 ยืนยันออกจากการสอบ</h3>
       <p class="modal-desc">
-        คุณตอบไปแล้ว <strong id="exit-answered-count"></strong> จาก
-        <strong id="exit-total-questions"></strong> ข้อ<br><br>
+        คุณตอบไปแล้ว <strong id="exit-answered-count">0</strong> จาก
+        <strong id="exit-total-questions">0</strong> ข้อ<br><br>
         <strong style="color:#f87171;">⚠️ หากออกจากการสอบ ข้อที่คุณตอบแล้วจะไม่ถูกบันทึก</strong><br>
         ยืนยันว่าต้องการออกจากการสอบหรือไม่?
       </p>
