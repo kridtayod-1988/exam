@@ -1,10 +1,11 @@
 /* ============================================
-   เตรียมสอบ ก.พ. — Design System v3
+   เตรียมสอบ ก.พ. — Design System v3.1
    Theme: Dark Navy + Gold Gaming/Premium
+   Update: เพิ่ม Question Context Blocks (condition/passage/table)
    ============================================ */
 
 /* ── Google Fonts ── */
-@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Prompt:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=Prompt:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* ── CSS Variables ── */
 :root {
@@ -49,6 +50,7 @@
 
   --font-display: 'Prompt', 'Sarabun', sans-serif;
   --font-body: 'Sarabun', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
 
   --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -226,6 +228,13 @@ a:hover { color: var(--gold-300); }
 .form-select { appearance: none; cursor: pointer; }
 .form-select option { background: var(--surface-1); color: var(--text-primary); }
 .form-textarea { resize: vertical; min-height: 80px; }
+
+/* Monospace textarea (สำหรับช่องเงื่อนไข) */
+.form-textarea-mono {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+}
 
 .form-error {
   background: rgba(239,68,68,0.1);
@@ -860,6 +869,137 @@ a:hover { color: var(--gold-300); }
 .fade-up-3 { animation-delay: 0.2s; }
 .fade-up-4 { animation-delay: 0.28s; }
 
+/* ═══════════════════════════════════════════
+   Question Context Blocks
+   (รองรับ: เงื่อนไขสัญลักษณ์ / บทความ / ตาราง)
+   ═══════════════════════════════════════════ */
+
+/* ── Label กลางของทุก context ── */
+.context-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  margin-bottom: 0.6rem;
+}
+
+/* ── 1. เงื่อนไขสัญลักษณ์ ── */
+.context-condition {
+  background: rgba(96, 165, 250, 0.06);
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  border-left: 4px solid #60a5fa;
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.context-condition .context-label {
+  background: rgba(96, 165, 250, 0.15);
+  color: #93c5fd;
+}
+.context-condition-content {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  color: #dbeafe;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  letter-spacing: 0.01em;
+}
+
+/* ── 2. บทความยาว ── */
+.context-passage {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--gold-500);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: all var(--transition);
+}
+.context-passage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem 0.5rem;
+}
+.context-passage .context-label {
+  background: var(--gold-glow);
+  color: var(--gold-400);
+  margin: 0;
+}
+.context-passage-toggle {
+  background: none;
+  border: none;
+  color: var(--gold-400);
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-weight: 600;
+  transition: background var(--transition);
+  white-space: nowrap;
+}
+.context-passage-toggle:hover {
+  background: var(--gold-glow);
+}
+.context-passage-content {
+  padding: 0 1.25rem 1.25rem;
+  color: var(--text-secondary);
+  line-height: 1.85;
+  font-size: 0.95rem;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+.context-passage.collapsed .context-passage-content {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+.context-passage-content::-webkit-scrollbar { width: 8px; }
+.context-passage-content::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.02);
+  border-radius: 4px;
+}
+.context-passage-content::-webkit-scrollbar-thumb {
+  background: rgba(240, 180, 41, 0.3);
+  border-radius: 4px;
+}
+.context-passage-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(240, 180, 41, 0.5);
+}
+
+/* ── 3. ตารางข้อมูล ── */
+.context-table-wrap {
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-card);
+  background: rgba(15, 32, 64, 0.4);
+  padding: 1rem 1.25rem 1.25rem;
+}
+.context-table-wrap .context-label {
+  background: rgba(167, 139, 250, 0.15);
+  color: #c4b5fd;
+  margin-bottom: 0.75rem;
+}
+.context-table-wrap .question-table {
+  margin: 0;
+  border-radius: var(--radius-sm);
+}
+.context-table-wrap .question-table th {
+  background: rgba(240, 180, 41, 0.12);
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .admin-layout { grid-template-columns: 1fr; }
@@ -870,6 +1010,24 @@ a:hover { color: var(--gold-300); }
   .mode-card .mode-action .btn { width: 100%; }
 }
 
+@media (max-width: 600px) {
+  .context-condition-content {
+    font-size: 0.85rem;
+    line-height: 1.75;
+  }
+  .context-passage-content {
+    font-size: 0.9rem;
+    line-height: 1.75;
+    max-height: 320px;
+  }
+  .context-condition,
+  .context-passage,
+  .context-table-wrap {
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+  }
+}
+
 /* ── Utility ── */
 .text-gold { color: var(--gold-400); }
 .text-muted { color: var(--text-muted); }
@@ -877,6 +1035,7 @@ a:hover { color: var(--gold-300); }
 .text-sm { font-size: 0.875rem; }
 .text-xs { font-size: 0.8rem; }
 .font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
 .font-bold { font-weight: 700; }
 .text-center { text-align: center; }
 .mt-1 { margin-top: 0.5rem; }
@@ -890,6 +1049,7 @@ a:hover { color: var(--gold-300); }
 .flex { display: flex; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
+.items-start { align-items: flex-start; }
 .justify-between { justify-content: space-between; }
 .justify-center { justify-content: center; }
 .gap-1 { gap: 0.5rem; }
@@ -898,6 +1058,7 @@ a:hover { color: var(--gold-300); }
 .hidden { display: none !important; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
 @media (max-width: 600px) {
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .count-group { flex-wrap: wrap; }
