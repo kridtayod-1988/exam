@@ -1,12 +1,12 @@
 // js/auth-guard.js
-// ใช้ตรวจสอบสถานะล็อกอิน + ดึงข้อมูล role ของผู้ใช้ปัจจุบัน (Supabase Auth เวอร์ชัน)
+// ตรวจสอบสถานะล็อกอิน + ดึงข้อมูล role (Supabase Auth)
 // หน้าที่ต้องล็อกอินก่อนถึงเข้าได้ (dashboard, exam, profile, admin/*) ต้องเรียกใช้ไฟล์นี้
 
-let currentUserData = null; // cache ข้อมูล profiles row (แปลงรูปแบบแล้ว) ของคนที่ล็อกอินอยู่
+let currentUserData = null;
 
 /**
  * ตรวจสอบว่าล็อกอินอยู่หรือไม่ ถ้าไม่ → เด้งไปหน้า login
- * คืนค่า { user, userData } ถ้าล็อกอินอยู่ (user = Supabase auth user, userData = profile ที่แปลงรูปแบบแล้ว)
+ * คืนค่า { user, userData } ถ้าล็อกอินอยู่
  */
 async function requireAuth(redirectTo = "login.html") {
   const { data: { session }, error: sessionError } = await sb.auth.getSession();
@@ -25,6 +25,30 @@ async function requireAuth(redirectTo = "login.html") {
       .eq("id", user.id)
       .single();
 
+    // Fallback: ถ้าไม่มี profile (PGRST116 = no rows) → สร้างให้เอง
+    if (profileError && profileError.code === "PGRST116") {
+      const fallbackName =
+        user.user_metadata?.display_name ||
+        user.user_metadata?.name ||
+        user.email.split("@")[0];
+
+      const { data: newProfile, error: createError } = await sb
+        .from("profiles")
+        .insert({
+          id: user.id,
+          email: user.email,
+          display_name: fallbackName,
+          role: "user"
+        })
+        .select()
+        .single();
+
+      if (createError) throw createError;
+      const mapped = mapProfileRow(newProfile);
+      currentUserData = mapped;
+      return { user, userData: mapped };
+    }
+
     if (profileError) throw profileError;
     const mapped = mapProfileRow(profile);
     currentUserData = mapped;
@@ -37,7 +61,6 @@ async function requireAuth(redirectTo = "login.html") {
 
 /**
  * ตรวจสอบว่าเป็น admin หรือไม่ ถ้าไม่ → เด้งกลับหน้า dashboard
- * ใช้ในทุกหน้าใต้ /admin/*
  */
 async function requireAdmin(redirectTo = "../dashboard.html") {
   const { user, userData } = await requireAuth("../login.html");
@@ -66,7 +89,6 @@ async function redirectIfAuthenticated(redirectTo = "dashboard.html") {
 async function signOutUser() {
   try {
     await sb.auth.signOut();
-    // path ต่างกันระหว่างหน้าปกติกับหน้าใน /admin/ จึงเช็คจาก path ปัจจุบัน
     const isInAdminFolder = window.location.pathname.includes("/admin/");
     window.location.href = isInAdminFolder ? "../index.html" : "index.html";
   } catch (err) {
