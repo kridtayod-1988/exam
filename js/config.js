@@ -3,8 +3,13 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 export const SUPABASE_URL = 'https://wefgreavazpfctayjnmp.supabase.co';
 export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlZmdyZWF2YXpwZmN0YXlqbm1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwOTk1MjMsImV4cCI6MjEwNTY3NTUyM30.XcBAvQ2z66STZj31NlwZyjB7vk4ozax3yg58t6_c1eI';   // anon key เท่านั้น
-
-export const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const ADMIN_BOOTSTRAP_EMAIL = 'CHANGE_ME@example.com'; // ⬅️ อีเมลแอดมินคนแรก
+export const EXAM_SIZE = 100;
+export const EXP_PER_CORRECT = 10;
+export const EXP_PER_LEVEL = 500;
+export const sb =
+  
+createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export const SUBJECT_LABELS = {
   aptitude:'ความสามารถในการคิดวิเคราะห์', thai:'ภาษาไทย',
