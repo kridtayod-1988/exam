@@ -1,89 +1,176 @@
-<!-- ═══════════════════════ login.html ═══════════════════════ -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เข้าสู่ระบบ — เตรียมสอบ ก.พ.</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://generativelanguage.googleapis.com; frame-src https://*.supabase.co;">
+  <title>เข้าสู่ระบบ — เตรียมสอบ ก.พ.</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-<nav class="navbar"><div class="navbar-inner">
-  <a href="index.html" class="navbar-brand"><span class="brand-icon">ก.พ.</span> เตรียมสอบ <span class="brand-accent">ก.พ.</span></a>
-  <div class="navbar-nav"><a href="signup.html" class="btn btn-outline btn-sm">สมัครสมาชิก</a></div>
-</div></nav>
+<body class="theme-light">
 
-<main class="container-sm" style="padding:3.5rem 1.25rem;">
-  <div class="card card-pad fade-up">
-    <h2 class="text-center mb-1">เข้าสู่ระบบ</h2>
-    <p class="text-secondary text-sm text-center mb-3">กลับมาทำภารกิจต่อจากที่ค้างไว้</p>
+  <div class="login-split">
 
-    <div id="alert" class="alert alert-error mb-2 hidden"></div>
+    <!-- ═══════════════════════════════════════
+         LEFT: Login Form
+         ═══════════════════════════════════════ -->
+    <section class="login-form-side">
+      <div class="login-form-wrap fade-up">
 
-    <form id="login-form" novalidate>
-      <div class="form-group">
-        <label class="form-label" for="email">อีเมล</label>
-        <input class="form-input" type="email" id="email" autocomplete="email" required placeholder="you@example.com">
+        <!-- Brand -->
+        <a href="index.html" class="login-brand">
+          <span class="login-brand-icon">⚔️</span>
+          <span class="login-brand-text">เตรียมสอบ <span>ก.พ.</span></span>
+        </a>
+
+        <!-- Heading -->
+        <div class="login-heading">
+          <h1>ยินดีต้อนรับกลับมา 👋</h1>
+          <p>เข้าสู่ระบบเพื่อทำข้อสอบต่อจากที่ค้างไว้</p>
+        </div>
+
+        <!-- Error banner -->
+        <div id="error-banner" class="login-error hidden"></div>
+
+        <!-- Form -->
+        <form id="login-form" class="login-form">
+
+          <div class="login-field">
+            <label for="login-email" class="login-label">อีเมล</label>
+            <div class="login-input-wrap">
+              <span class="login-input-icon">✉️</span>
+              <input
+                type="email"
+                id="login-email"
+                required
+                autocomplete="email"
+                class="login-input"
+                placeholder="you@example.com">
+            </div>
+          </div>
+
+          <div class="login-field">
+            <div class="login-label-row">
+              <label for="login-password" class="login-label">รหัสผ่าน</label>
+              <a href="forgot-password.html" class="login-forgot">ลืมรหัสผ่าน?</a>
+            </div>
+            <div class="login-input-wrap">
+              <span class="login-input-icon">🔒</span>
+              <input
+                type="password"
+                id="login-password"
+                required
+                autocomplete="current-password"
+                class="login-input"
+                placeholder="••••••••">
+              <button
+                type="button"
+                id="toggle-password-btn"
+                class="login-input-toggle"
+                aria-label="แสดง/ซ่อนรหัสผ่าน">👁️</button>
+            </div>
+          </div>
+
+          <button type="submit" id="login-submit-btn" class="login-submit-btn">
+            <span class="login-submit-text">เข้าสู่ระบบ</span>
+            <span class="login-submit-spinner hidden"></span>
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="login-divider">
+          <span>หรือ</span>
+        </div>
+
+        <!-- Google Sign-In -->
+        <button id="google-signin-btn" type="button" class="login-google-btn">
+          <svg style="width:20px;height:20px;flex-shrink:0;" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+          </svg>
+          <span>เข้าสู่ระบบด้วย Google</span>
+        </button>
+
+        <!-- Signup link -->
+        <p class="login-signup">
+          ยังไม่มีบัญชี? <a href="signup.html">สมัครสมาชิกฟรี</a>
+        </p>
       </div>
-      <div class="form-group">
-        <label class="form-label" for="password">รหัสผ่าน</label>
-        <input class="form-input" type="password" id="password" autocomplete="current-password" required placeholder="••••••••">
-      </div>
-      <button class="btn btn-primary btn-block btn-lg" id="submit-btn" type="submit">เข้าสู่ระบบ</button>
-    </form>
+    </section>
 
-    <p class="text-center text-sm text-secondary mt-3">
-      ยังไม่มีบัญชี? <a href="signup.html">สมัครสมาชิกฟรี</a>
-    </p>
-    <p class="text-center text-sm mt-1">
-      <a href="#" id="reset-link" class="text-muted">ลืมรหัสผ่าน</a>
-    </p>
+    <!-- ═══════════════════════════════════════
+         RIGHT: Showcase (categories + years)
+         ═══════════════════════════════════════ -->
+    <aside class="login-showcase-side">
+
+      <!-- Decorative background -->
+      <div class="login-showcase-bg" aria-hidden="true"></div>
+
+      <div class="login-showcase-content fade-up fade-up-2">
+
+        <!-- Header -->
+        <div class="login-showcase-header">
+          <div class="login-showcase-badge">
+            <span>✨</span> ระบบฝึกทำข้อสอบอัจฉริยะ
+          </div>
+          <h2>พร้อมพิชิตข้อสอบ<br>ก.พ. ไปกับเรา</h2>
+          <p>รวมข้อสอบคุณภาพ เฉลยละเอียด พร้อมระบบติดตามความก้าวหน้า</p>
+        </div>
+
+        <!-- ═══ Categories ═══ -->
+        <div class="login-showcase-section">
+          <div class="login-showcase-section-title">
+            <span class="login-showcase-icon">📚</span>
+            <span>หมวดหมู่วิชา</span>
+          </div>
+          <div id="showcase-categories" class="login-chip-list">
+            <span class="login-chip-skeleton"></span>
+            <span class="login-chip-skeleton"></span>
+            <span class="login-chip-skeleton"></span>
+          </div>
+        </div>
+
+        <!-- ═══ Exam Years ═══ -->
+        <div class="login-showcase-section">
+          <div class="login-showcase-section-title">
+            <span class="login-showcase-icon">📅</span>
+            <span>ชุดข้อสอบรายปี</span>
+          </div>
+          <div id="showcase-years" class="login-chip-list">
+            <span class="login-chip-skeleton"></span>
+            <span class="login-chip-skeleton"></span>
+          </div>
+        </div>
+
+        <!-- Footer stat -->
+        <div class="login-showcase-stats">
+          <div class="login-stat">
+            <div class="login-stat-value" id="stat-questions-count">—</div>
+            <div class="login-stat-label">ข้อสอบ</div>
+          </div>
+          <div class="login-stat-divider" aria-hidden="true"></div>
+          <div class="login-stat">
+            <div class="login-stat-value">100%</div>
+            <div class="login-stat-label">ฟรี</div>
+          </div>
+          <div class="login-stat-divider" aria-hidden="true"></div>
+          <div class="login-stat">
+            <div class="login-stat-value">∞</div>
+            <div class="login-stat-label">ทำได้ไม่จำกัด</div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
   </div>
-</main>
 
-<script type="module">
-import { sb } from './js/config.js';
-
-const form = document.getElementById('login-form');
-const alertBox = document.getElementById('alert');
-const btn = document.getElementById('submit-btn');
-const show = m => { alertBox.textContent = m; alertBox.classList.remove('hidden'); };
-
-const params = new URLSearchParams(location.search);
-if (params.get('banned')) show('บัญชีนี้ถูกระงับการใช้งาน กรุณาติดต่อผู้ดูแลระบบ');
-if (params.get('registered')) {
-  alertBox.className = 'alert alert-success mb-2';
-  show('สมัครสมาชิกสำเร็จ กรุณายืนยันอีเมลแล้วเข้าสู่ระบบ');
-}
-
-// ถ้ามี session อยู่แล้วให้ข้ามไปแดชบอร์ด
-sb.auth.getSession().then(({data}) => { if (data.session) location.replace('dashboard.html'); });
-
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  alertBox.classList.add('hidden');
-  btn.disabled = true; btn.textContent = 'กำลังตรวจสอบ...';
-  const { error } = await sb.auth.signInWithPassword({
-    email: document.getElementById('email').value.trim().toLowerCase(),
-    password: document.getElementById('password').value
-  });
-  if (error){
-    alertBox.className = 'alert alert-error mb-2';
-    show(error.message.includes('Invalid') ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' : error.message);
-    btn.disabled = false; btn.textContent = 'เข้าสู่ระบบ';
-    return;
-  }
-  location.href = new URLSearchParams(location.search).get('next') || 'dashboard.html';
-});
-
-document.getElementById('reset-link').addEventListener('click', async e => {
-  e.preventDefault();
-  const email = document.getElementById('email').value.trim();
-  if (!email) return show('กรุณากรอกอีเมลก่อนกดลืมรหัสผ่าน');
-  const { error } = await sb.auth.resetPasswordForEmail(email,
-    { redirectTo: location.origin + '/login.html' });
-  alertBox.className = error ? 'alert alert-error mb-2' : 'alert alert-success mb-2';
-  show(error ? error.message : 'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปยังอีเมลแล้ว');
-});
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth-guard.js"></script>
+  <script src="js/login.js"></script>
 </body>
 </html>
