@@ -1,0 +1,102 @@
+<!-- ═══════════════════════ signup.html ═══════════════════════ -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สมัครสมาชิก — เตรียมสอบ ก.พ.</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner">
+  <a href="index.html" class="navbar-brand"><span class="brand-icon">ก.พ.</span> เตรียมสอบ <span class="brand-accent">ก.พ.</span></a>
+  <div class="navbar-nav"><a href="login.html" class="btn btn-outline btn-sm">เข้าสู่ระบบ</a></div>
+</div></nav>
+
+<main class="container-sm" style="padding:3rem 1.25rem;">
+  <div class="card card-pad fade-up">
+    <h2 class="text-center mb-1">สร้างบัญชีใหม่</h2>
+    <p class="text-secondary text-sm text-center mb-3">เริ่มต้นที่ Level 1 — ใช้งานฟรีทั้งหมด</p>
+
+    <div id="alert" class="alert alert-error mb-2 hidden"></div>
+
+    <form id="signup-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="name">ชื่อที่ใช้แสดง</label>
+        <input class="form-input" id="name" required maxlength="40" placeholder="เช่น สมชาย">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">อีเมล</label>
+        <input class="form-input" type="email" id="email" autocomplete="email" required placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">รหัสผ่าน</label>
+        <input class="form-input" type="password" id="password" autocomplete="new-password" required placeholder="อย่างน้อย 8 อักขระ">
+        <div class="form-hint">ควรประกอบด้วยตัวอักษรพิมพ์เล็ก พิมพ์ใหญ่ และตัวเลข</div>
+        <div class="form-error hidden" id="err-pw"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password2">ยืนยันรหัสผ่าน</label>
+        <input class="form-input" type="password" id="password2" autocomplete="new-password" required>
+      </div>
+      <label class="flex items-center gap-1 text-sm text-secondary mb-3">
+        <input type="checkbox" id="accept" required>
+        <span>ข้าพเจ้ายอมรับว่าระบบนี้จัดทำเพื่อการศึกษาเท่านั้น</span>
+      </label>
+      <button class="btn btn-primary btn-block btn-lg" id="submit-btn" type="submit">สมัครสมาชิก</button>
+    </form>
+
+    <p class="text-center text-sm text-secondary mt-3">
+      มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a>
+    </p>
+  </div>
+</main>
+
+<script type="module">
+import { sb } from './js/config.js';
+const $ = id => document.getElementById(id);
+const alertBox = $('alert');
+const show = (m, ok=false) => {
+  alertBox.className = `alert ${ok?'alert-success':'alert-error'} mb-2`;
+  alertBox.textContent = m; alertBox.classList.remove('hidden');
+};
+
+const strongEnough = pw => pw.length >= 8 && /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /\d/.test(pw);
+
+$('password').addEventListener('input', e => {
+  const err = $('err-pw');
+  if (e.target.value && !strongEnough(e.target.value)){
+    err.textContent = 'รหัสผ่านต้องยาวอย่างน้อย 8 อักขระ และมีพิมพ์เล็ก พิมพ์ใหญ่ ตัวเลข';
+    err.classList.remove('hidden');
+  } else err.classList.add('hidden');
+});
+
+$('signup-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  alertBox.classList.add('hidden');
+  const name = $('name').value.trim();
+  const email = $('email').value.trim().toLowerCase();
+  const pw = $('password').value, pw2 = $('password2').value;
+
+  if (!name) return show('กรุณากรอกชื่อที่ใช้แสดง');
+  if (!strongEnough(pw)) return show('รหัสผ่านยังไม่ผ่านเกณฑ์ความปลอดภัย');
+  if (pw !== pw2) return show('รหัสผ่านทั้งสองช่องไม่ตรงกัน');
+  if (!$('accept').checked) return show('กรุณายอมรับเงื่อนไขการใช้งาน');
+
+  const btn = $('submit-btn');
+  btn.disabled = true; btn.textContent = 'กำลังสร้างบัญชี...';
+
+  const { error } = await sb.auth.signUp({
+    email, password: pw,
+    options: { data: { display_name: name }, emailRedirectTo: location.origin + '/login.html' }
+  });
+
+  if (error){
+    show(error.message.includes('already') ? 'อีเมลนี้ถูกใช้สมัครไว้แล้ว' : error.message);
+    btn.disabled = false; btn.textContent = 'สมัครสมาชิก';
+    return;
+  }
+  location.href = 'login.html?registered=1';
+});
+</script>
+</body>
+</html>
