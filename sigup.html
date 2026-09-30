@@ -1,54 +1,102 @@
-<!-- signup.html -->
-<!DOCTYPE html><html lang="th"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- ═══════════════════════ signup.html ═══════════════════════ -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>สมัครสมาชิก — เตรียมสอบ ก.พ.</title>
-<link rel="stylesheet" href="css/style.css"></head>
-<body style="background:var(--bg-soft);min-height:100vh;display:grid;place-items:center;padding:1.5rem;">
-  <div style="width:100%;max-width:440px;">
-    <div class="text-center mb-3">
-      <a href="index.html" class="navbar-brand" style="justify-content:center;font-size:1.3rem;">
-        <span>⚔️</span> เตรียมสอบ <span class="brand-accent">ก.พ.</span></a>
-      <p class="text-secondary text-sm mt-2">สมัครฟรี เริ่มสะสม EXP ภายใน 1 นาที</p>
-    </div>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<nav class="navbar"><div class="navbar-inner">
+  <a href="index.html" class="navbar-brand"><span class="brand-icon">ก.พ.</span> เตรียมสอบ <span class="brand-accent">ก.พ.</span></a>
+  <div class="navbar-nav"><a href="login.html" class="btn btn-outline btn-sm">เข้าสู่ระบบ</a></div>
+</div></nav>
 
-    <div class="card card-flat" id="signup-card" style="padding:1.75rem;">
-      <h2 style="font-size:1.35rem;" class="mb-3">สร้างบัญชีใหม่</h2>
-      <div id="form-error" class="error-text mb-2 hidden"></div>
-      <form id="signup-form" novalidate>
-        <div class="field">
-          <label for="display_name">ชื่อที่ใช้แสดง</label>
-          <input id="display_name" name="display_name" class="input" required maxlength="40" placeholder="เช่น น้องเตรียมสอบ">
-        </div>
-        <div class="field">
-          <label for="email">อีเมล</label>
-          <input id="email" name="email" type="email" class="input" required autocomplete="email" placeholder="you@example.com">
-          <span class="help">ใช้สำหรับยืนยันตัวตนและกู้คืนรหัสผ่าน</span>
-        </div>
-        <div class="field">
-          <label for="password">รหัสผ่าน</label>
-          <input id="password" name="password" type="password" class="input" required minlength="8" autocomplete="new-password">
-          <div class="progress" style="margin-top:.35rem;"><span id="pw-bar" style="width:0"></span></div>
-          <span class="help">อย่างน้อย 8 ตัว มีทั้งตัวอักษรและตัวเลข</span>
-        </div>
-        <div class="field">
-          <label for="password2">ยืนยันรหัสผ่าน</label>
-          <input id="password2" name="password2" type="password" class="input" required autocomplete="new-password">
-        </div>
-        <label class="text-sm text-secondary flex items-start gap-1 mb-3" style="font-weight:400;">
-          <input type="checkbox" name="accept" style="margin-top:.35rem;">
-          <span>ฉันยอมรับ <a href="terms.html">เงื่อนไขการใช้งาน</a> และ <a href="privacy.html">นโยบายความเป็นส่วนตัว</a></span>
-        </label>
-        <button type="submit" class="btn btn-gold btn-block btn-lg">สมัครสมาชิก</button>
-      </form>
-      <p class="text-center text-sm text-secondary mt-3">มีบัญชีแล้ว? <a href="login.html"><strong>เข้าสู่ระบบ</strong></a></p>
-    </div>
+<main class="container-sm" style="padding:3rem 1.25rem;">
+  <div class="card card-pad fade-up">
+    <h2 class="text-center mb-1">สร้างบัญชีใหม่</h2>
+    <p class="text-secondary text-sm text-center mb-3">เริ่มต้นที่ Level 1 — ใช้งานฟรีทั้งหมด</p>
 
-    <div class="card card-flat hidden text-center" id="signup-done" style="padding:2.5rem 1.75rem;">
-      <div style="font-size:2.5rem;">📧</div>
-      <h2 style="font-size:1.25rem;" class="mb-2 mt-2">ตรวจอีเมลของคุณ</h2>
-      <p class="text-secondary text-sm mb-3">เราส่งลิงก์ยืนยันไปให้แล้ว กดยืนยันเพื่อเปิดใช้งานบัญชี</p>
-      <a href="login.html" class="btn btn-outline btn-block">กลับไปหน้าเข้าสู่ระบบ</a>
-    </div>
+    <div id="alert" class="alert alert-error mb-2 hidden"></div>
+
+    <form id="signup-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="name">ชื่อที่ใช้แสดง</label>
+        <input class="form-input" id="name" required maxlength="40" placeholder="เช่น สมชาย">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">อีเมล</label>
+        <input class="form-input" type="email" id="email" autocomplete="email" required placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">รหัสผ่าน</label>
+        <input class="form-input" type="password" id="password" autocomplete="new-password" required placeholder="อย่างน้อย 8 อักขระ">
+        <div class="form-hint">ควรประกอบด้วยตัวอักษรพิมพ์เล็ก พิมพ์ใหญ่ และตัวเลข</div>
+        <div class="form-error hidden" id="err-pw"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password2">ยืนยันรหัสผ่าน</label>
+        <input class="form-input" type="password" id="password2" autocomplete="new-password" required>
+      </div>
+      <label class="flex items-center gap-1 text-sm text-secondary mb-3">
+        <input type="checkbox" id="accept" required>
+        <span>ข้าพเจ้ายอมรับว่าระบบนี้จัดทำเพื่อการศึกษาเท่านั้น</span>
+      </label>
+      <button class="btn btn-primary btn-block btn-lg" id="submit-btn" type="submit">สมัครสมาชิก</button>
+    </form>
+
+    <p class="text-center text-sm text-secondary mt-3">
+      มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a>
+    </p>
   </div>
-  <script type="module" src="js/auth.js"></script>
-</body></html>
+</main>
+
+<script type="module">
+import { sb } from './js/config.js';
+const $ = id => document.getElementById(id);
+const alertBox = $('alert');
+const show = (m, ok=false) => {
+  alertBox.className = `alert ${ok?'alert-success':'alert-error'} mb-2`;
+  alertBox.textContent = m; alertBox.classList.remove('hidden');
+};
+
+const strongEnough = pw => pw.length >= 8 && /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /\d/.test(pw);
+
+$('password').addEventListener('input', e => {
+  const err = $('err-pw');
+  if (e.target.value && !strongEnough(e.target.value)){
+    err.textContent = 'รหัสผ่านต้องยาวอย่างน้อย 8 อักขระ และมีพิมพ์เล็ก พิมพ์ใหญ่ ตัวเลข';
+    err.classList.remove('hidden');
+  } else err.classList.add('hidden');
+});
+
+$('signup-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  alertBox.classList.add('hidden');
+  const name = $('name').value.trim();
+  const email = $('email').value.trim().toLowerCase();
+  const pw = $('password').value, pw2 = $('password2').value;
+
+  if (!name) return show('กรุณากรอกชื่อที่ใช้แสดง');
+  if (!strongEnough(pw)) return show('รหัสผ่านยังไม่ผ่านเกณฑ์ความปลอดภัย');
+  if (pw !== pw2) return show('รหัสผ่านทั้งสองช่องไม่ตรงกัน');
+  if (!$('accept').checked) return show('กรุณายอมรับเงื่อนไขการใช้งาน');
+
+  const btn = $('submit-btn');
+  btn.disabled = true; btn.textContent = 'กำลังสร้างบัญชี...';
+
+  const { error } = await sb.auth.signUp({
+    email, password: pw,
+    options: { data: { display_name: name }, emailRedirectTo: location.origin + '/login.html' }
+  });
+
+  if (error){
+    show(error.message.includes('already') ? 'อีเมลนี้ถูกใช้สมัครไว้แล้ว' : error.message);
+    btn.disabled = false; btn.textContent = 'สมัครสมาชิก';
+    return;
+  }
+  location.href = 'login.html?registered=1';
+});
+</script>
+</body>
+</html>
