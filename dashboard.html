@@ -1,128 +1,107 @@
+<!-- ═══════════════════ dashboard.html — ศูนย์รวมผู้ใช้/เลือกด่าน ═══════════════════ -->
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://api.anthropic.com https://generativelanguage.googleapis.com; frame-src https://*.supabase.co;">
-  <title>เลือกภารกิจ — เตรียมสอบ ก.พ.</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แดชบอร์ด — เตรียมสอบ ก.พ.</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<nav class="navbar"><div class="navbar-inner">
+  <a href="dashboard.html" class="navbar-brand"><span class="brand-icon">ก.พ.</span> เตรียมสอบ <span class="brand-accent">ก.พ.</span></a>
+  <div class="navbar-nav" id="nav-user">
+    <span id="nav-name" class="text-sm text-secondary"></span>
+    <!-- Hidden Tab: ปรากฏเฉพาะเมื่อ role = admin -->
+    <a href="admin.html" id="nav-admin" class="hidden badge badge-gold">ผู้ดูแลระบบ</a>
+    <button id="nav-logout" class="btn btn-ghost btn-sm">ออกจากระบบ</button>
+  </div>
+</div></nav>
 
-  <nav class="navbar">
-    <div class="navbar-inner">
-      <a href="dashboard.html" class="navbar-brand">
-        <span class="brand-icon">⚔️</span>
-        เตรียมสอบ <span class="brand-accent">ก.พ.</span>
-      </a>
-      <div class="navbar-nav">
-        <span id="user-greeting" class="text-secondary text-sm" style="padding:0.45rem 0.5rem;"></span>
-        <a href="profile.html">โปรไฟล์</a>
-        <button id="logout-btn">ออกจากระบบ</button>
+<main class="container" style="padding:2.5rem 1.25rem 4rem;">
+  <!-- สรุปสถานะผู้เล่น -->
+  <div class="card card-pad mb-4 fade-up">
+    <div class="flex justify-between items-center gap-3" style="flex-wrap:wrap;">
+      <div>
+        <div class="level-badge mb-1" id="lv-badge">Level 1</div>
+        <h2 id="greet" class="mb-1">ยินดีต้อนรับ</h2>
+        <p class="text-secondary text-sm" id="exp-text">EXP 0</p>
       </div>
+      <a href="exam.html?mode=full&limit=100" class="btn btn-primary btn-lg">เริ่มชุดข้อสอบ 100 ข้อ</a>
     </div>
-  </nav>
+    <div class="exp-bar mt-3"><div class="exp-fill" id="exp-fill" style="width:0%"></div></div>
+  </div>
 
-  <main class="container" style="padding: 2rem 1.25rem 3rem;">
+  <!-- สถิติ -->
+  <div class="grid-4 mb-4" id="stats"></div>
 
-    <!-- Level / EXP widget -->
-    <div class="card fade-up mb-4" style="padding:1.5rem 1.75rem;">
-      <div class="flex items-center justify-between mb-2" style="flex-wrap:wrap;gap:0.75rem;">
-        <div class="flex items-center gap-2">
-          <div class="level-badge">
-            <span>LV.</span><span id="level-num" class="lv-num">1</span>
-          </div>
-          <span class="text-secondary text-sm">นักสู้ข้อสอบ ก.พ.</span>
-        </div>
-        <span id="exp-label" class="text-xs text-muted">0 / 100 EXP</span>
-      </div>
-      <div class="exp-bar-track">
-        <div id="exp-fill" class="exp-bar-fill" style="width:0%;"></div>
-      </div>
-    </div>
+  <!-- เลือกด่านตามวิชา -->
+  <h3 class="mb-2">เลือกด่านตามวิชา</h3>
+  <div class="grid-2 mb-4" id="subject-grid"></div>
 
-    <h1 class="mb-1">เลือกภารกิจ</h1>
-    <p class="text-secondary mb-4">เลือกรูปแบบการฝึกที่เหมาะกับคุณ — ทุกข้อที่ตอบถูกคือ EXP</p>
+  <!-- ประวัติการทำข้อสอบ -->
+  <h3 class="mb-2">ประวัติการทำข้อสอบ</h3>
+  <div class="card" style="overflow-x:auto;">
+    <table class="table">
+      <thead><tr><th>วันที่</th><th>โหมด</th><th>คะแนน</th><th>ถูก/ทั้งหมด</th><th>EXP</th><th></th></tr></thead>
+      <tbody id="history"><tr><td colspan="6" class="text-muted">กำลังโหลด...</td></tr></tbody>
+    </table>
+  </div>
+</main>
 
-    <!-- โหมดข้อสอบจริง 100 ข้อ -->
-    <div class="card mode-card fade-up fade-up-1 mb-3">
-      <div class="mode-icon">📝</div>
-      <div class="mode-info">
-        <div class="mode-title">ข้อสอบจริง — บอสด่านใหญ่</div>
-        <div id="full-exam-description" class="mode-desc">สุ่มข้อสอบจากคลังทั้งหมด พยายามเลี่ยงข้อที่คุณเคยทำไปแล้ว</div>
-      </div>
-      <div class="mode-action">
-        <button id="start-full-exam-btn" class="btn btn-gold">เริ่มทำข้อสอบจริง</button>
-      </div>
-    </div>
+<script type="module">
+import { sb, SUBJECT_LABELS, expForLevel } from './js/config.js';
+import { requireAuth, mountNavbar } from './js/auth.js';
 
-    <!-- โหมดแยกหมวดหมู่ -->
-    <div class="card fade-up fade-up-2 mb-3" style="padding:1.75rem;">
-      <div class="flex items-center gap-2 mb-3">
-        <span style="font-size:1.75rem;">📚</span>
-        <div>
-          <div class="mode-title" style="font-size:1.05rem;">ฝึกตามหมวดหมู่</div>
-          <div class="text-secondary text-sm">เลือกหมวดหมู่เพื่อฝึกข้อสอบเฉพาะด้าน</div>
-        </div>
-      </div>
+const p = await requireAuth();
+if (p) {
+  await mountNavbar();
+  document.getElementById('greet').textContent = `สวัสดี ${p.display_name ?? ''}`;
+  document.getElementById('lv-badge').textContent = `Level ${p.level}`;
 
-      <div class="form-group mb-0">
-        <label class="form-label">หมวดหมู่</label>
-        <select id="category-select" class="form-select">
-          <option value="">กำลังโหลด...</option>
-        </select>
-      </div>
+  const cur = expForLevel(p.level), next = expForLevel(p.level + 1);
+  const pct = Math.min(100, Math.round((p.exp - cur) * 100 / Math.max(1, next - cur)));
+  document.getElementById('exp-fill').style.width = pct + '%';
+  document.getElementById('exp-text').textContent =
+    `EXP ${p.exp} / ${next} — อีก ${Math.max(0, next - p.exp)} EXP จะถึง Level ${p.level + 1}`;
 
-      <button id="start-category-exam-btn" class="btn btn-outline btn-full mt-3">
-        เริ่มฝึกตามหมวดหมู่
-      </button>
-    </div>
+  // สถิติรวม
+  const { data: sessions } = await sb.from('exam_sessions')
+    .select('*').eq('user_id', p.id).not('submitted_at','is',null)
+    .order('submitted_at', { ascending:false });
+  const done = sessions ?? [];
+  const totalQ = done.reduce((s,x)=>s+x.total,0);
+  const totalC = done.reduce((s,x)=>s+x.correct,0);
+  const avg = done.length ? (done.reduce((s,x)=>s+Number(x.score),0)/done.length).toFixed(1) : '0.0';
+  const best = done.length ? Math.max(...done.map(x=>Number(x.score))).toFixed(1) : '0.0';
 
-    <!-- โหมดแยกปี -->
-    <div class="card fade-up fade-up-3" style="padding:1.75rem;">
-      <div class="flex items-center gap-2 mb-3">
-        <span style="font-size:1.75rem;">📅</span>
-        <div>
-          <div class="mode-title" style="font-size:1.05rem;">ฝึกตามปีข้อสอบ</div>
-          <div class="text-secondary text-sm">เลือกปีเพื่อฝึกข้อสอบปีนั้นๆ</div>
-        </div>
-      </div>
+  document.getElementById('stats').innerHTML = [
+    ['ครั้งที่ทำ', done.length], ['ข้อที่ทำทั้งหมด', totalQ],
+    ['คะแนนเฉลี่ย', avg + '%'], ['คะแนนสูงสุด', best + '%']
+  ].map(([l,v]) => `<div class="card card-pad text-center">
+      <div class="font-display" style="font-size:1.7rem;">${v}</div>
+      <div class="text-muted text-sm">${l}</div></div>`).join('');
 
-      <div class="form-group mb-0">
-        <label class="form-label">ปีข้อสอบ</label>
-        <select id="year-select" class="form-select">
-          <option value="">กำลังโหลด...</option>
-        </select>
-      </div>
+  // ด่านตามวิชา
+  const { data: qs } = await sb.from('questions').select('subject').eq('is_active', true);
+  const counts = (qs ?? []).reduce((a,q)=>(a[q.subject]=(a[q.subject]??0)+1,a),{});
+  document.getElementById('subject-grid').innerHTML = Object.entries(SUBJECT_LABELS)
+    .map(([k,label]) => `<a class="card card-hover card-pad" href="exam.html?mode=subject&value=${k}&limit=30">
+        <div class="flex justify-between items-center">
+          <div><h3 class="mb-1">${label}</h3>
+            <p class="text-muted text-sm">${counts[k] ?? 0} ข้อในคลัง</p></div>
+          <span class="badge badge-primary">เริ่มด่าน</span>
+        </div></a>`).join('');
 
-      <button id="start-year-exam-btn" class="btn btn-outline btn-full mt-3">
-        เริ่มฝึกตามปีข้อสอบ
-      </button>
-    </div>
-
-    <!-- สถิติย่อ -->
-    <div class="grid-3 mt-4">
-      <div class="card stat-card fade-up">
-        <div class="stat-icon">🎮</div>
-        <p id="stat-total-attempts" class="stat-value">-</p>
-        <p class="stat-label">ครั้งที่ทำข้อสอบ</p>
-      </div>
-      <div class="card stat-card fade-up">
-        <div class="stat-icon">👑</div>
-        <p id="stat-best-score" class="stat-value">-</p>
-        <p class="stat-label">คะแนนดีที่สุด</p>
-      </div>
-      <div class="card stat-card fade-up" style="display:flex;flex-direction:column;justify-content:center;">
-        <a href="profile.html" class="btn btn-ghost btn-sm">ดูประวัติทั้งหมด →</a>
-      </div>
-    </div>
-  </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="js/supabase-config.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/auth-guard.js"></script>
-  <script src="js/exam-engine.js"></script>
-  <script src="js/dashboard.js"></script>
+  // ประวัติ
+  document.getElementById('history').innerHTML = done.length
+    ? done.slice(0,10).map(s => `<tr>
+        <td>${new Date(s.submitted_at).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'})}</td>
+        <td>${s.mode === 'full' ? 'ชุดเต็ม' : (SUBJECT_LABELS[s.filter_value] ?? s.filter_value ?? '-')}</td>
+        <td><span class="badge ${Number(s.score)>=60?'badge-success':'badge-danger'}">${Number(s.score).toFixed(1)}%</span></td>
+        <td>${s.correct}/${s.total}</td><td>+${s.exp_gained}</td>
+        <td><a class="text-sm" href="exam.html?review=${s.id}">ดูเฉลย</a></td></tr>`).join('')
+    : '<tr><td colspan="6" class="text-muted">ยังไม่มีประวัติ — เริ่มภารกิจแรกได้เลย</td></tr>';
+}
+</script>
 </body>
 </html>
