@@ -1,0 +1,28 @@
+// package.json — เพิ่มเข้าโปรเจกต์โดยไม่กระทบการเป็น static site
+// GitHub Pages ยัง deploy ไฟล์ HTML/JS ตรงเหมือนเดิมทุกประการ
+// npm ใช้เฉพาะตอนพัฒนาและตอนรัน CI เท่านั้น
+{
+  "name": "kp-exam-v4",
+  "version": "4.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "content:ingest": "node scripts/ingest.mjs content/questions.csv",
+    "content:validate": "node scripts/validateBankCli.mjs",
+    "content:push": "node scripts/seedBank.mjs",
+    "calibrate": "node scripts/calibrate.mjs --min-n 200",
+    "backup": "node scripts/backup.mjs",
+    "serve": "npx serve ."
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "csv-parse": "^5.5.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}
