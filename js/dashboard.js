@@ -1,21 +1,19 @@
 // js/dashboard.js
-// Dashboard — เลือกโหมดทำข้อสอบ + แสดง EXP/Level
+// Dashboard — เลือกโหมดทำข้อสอบ + แสดง EXP/Level + ชุดข้อสอบย้อนหลัง
 
 // ═══════════════════════════════════════════
 // Constants
 // ═══════════════════════════════════════════
 const DEFAULT_CATEGORY_COUNT = 25;
-const DEFAULT_YEAR_COUNT = 25;
 
 // ═══════════════════════════════════════════
-// Main init — รอ DOM พร้อมก่อน แล้วค่อยทำงาน
+// Main init
 // ═══════════════════════════════════════════
 function initDashboard() {
   console.log("[dashboard] init start");
 
-  // ─── ตรวจ dependencies ───
   if (typeof sb === "undefined") {
-    console.error("[dashboard] ❌ sb (Supabase client) ไม่ได้โหลด — ตรวจ supabase-config.js");
+    console.error("[dashboard] ❌ sb ไม่ได้โหลด — ตรวจ supabase-config.js");
     showToast("ระบบยังโหลดไม่ครบ กรุณา refresh หน้า", "error");
     return;
   }
@@ -26,28 +24,25 @@ function initDashboard() {
 
   // ─── Bind ปุ่ม logout ───
   const logoutBtn = document.getElementById("logout-btn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", signOutUser);
-  } else {
-    console.warn("[dashboard] #logout-btn not found");
-  }
+  if (logoutBtn) logoutBtn.addEventListener("click", signOutUser);
 
-  // ─── Bind ปุ่มเริ่มข้อสอบทั้ง 3 ───
+  // ─── Bind ปุ่มเริ่มข้อสอบ ───
   bindExamButtons();
 
-  // ─── โหลดข้อมูลผู้ใช้ + ข้อมูลประกอบ ───
+  // ─── โหลดข้อมูล ───
   loadDashboardData();
 }
 
+// ═══════════════════════════════════════════
+// Bind buttons
+// ═══════════════════════════════════════════
 function bindExamButtons() {
   const startFullBtn = document.getElementById("start-full-exam-btn");
   const startCategoryBtn = document.getElementById("start-category-exam-btn");
-  const startYearBtn = document.getElementById("start-year-exam-btn");
 
   console.log("[dashboard] ปุ่มที่พบ:", {
     full: !!startFullBtn,
-    category: !!startCategoryBtn,
-    year: !!startYearBtn
+    category: !!startCategoryBtn
   });
 
   if (startFullBtn) {
@@ -57,7 +52,7 @@ function bindExamButtons() {
       window.location.href = "exam.html";
     });
   } else {
-    console.error("[dashboard] ❌ ไม่พบ #start-full-exam-btn — ตรวจ dashboard.html");
+    console.error("[dashboard] ❌ ไม่พบ #start-full-exam-btn");
   }
 
   if (startCategoryBtn) {
@@ -69,28 +64,20 @@ function bindExamButtons() {
       }
       sessionStorage.setItem(
         "examConfig",
-        JSON.stringify({ mode: "category", categoryId, count: DEFAULT_CATEGORY_COUNT })
-      );
-      window.location.href = "exam.html";
-    });
-  }
-
-  if (startYearBtn) {
-    startYearBtn.addEventListener("click", () => {
-      const examYearId = document.getElementById("year-select")?.value;
-      if (!examYearId) {
-        showToast("กรุณาเลือกปีข้อสอบก่อน", "warning");
-        return;
-      }
-      sessionStorage.setItem(
-        "examConfig",
-        JSON.stringify({ mode: "year", examYearId, count: DEFAULT_YEAR_COUNT })
+        JSON.stringify({
+          mode: "category",
+          categoryId,
+          count: DEFAULT_CATEGORY_COUNT
+        })
       );
       window.location.href = "exam.html";
     });
   }
 }
 
+// ═══════════════════════════════════════════
+// Load dashboard data
+// ═══════════════════════════════════════════
 async function loadDashboardData() {
   try {
     const { user, userData } = await requireAuth();
@@ -109,13 +96,16 @@ async function loadDashboardData() {
     await Promise.all([
       loadSystemConfig(),
       loadCategories(),
-      loadExamYears()
+      loadPapersAsCards()
     ]);
   } catch (err) {
     console.error("[dashboard] โหลดข้อมูลไม่สำเร็จ:", err);
   }
 }
 
+// ═══════════════════════════════════════════
+// System config
+// ═══════════════════════════════════════════
 async function loadSystemConfig() {
   try {
     const { data, error } = await withRetry(
@@ -137,9 +127,13 @@ async function loadSystemConfig() {
   }
 }
 
+// ═══════════════════════════════════════════
+// Categories
+// ═══════════════════════════════════════════
 async function loadCategories() {
   const select = document.getElementById("category-select");
   if (!select) return;
+
   try {
     const { data, error } = await withRetry(
       () => sb
@@ -162,47 +156,141 @@ async function loadCategories() {
       option.textContent = row.name;
       select.appendChild(option);
     });
-    console.log("[dashboard] โหลดหมวดหมู่แล้ว:", data.length, "รายการ");
+    console.log("[dashboard] โหลดหมวดหมู่:", data.length, "รายการ");
   } catch (err) {
     console.error("[dashboard] loadCategories error:", err);
     select.innerHTML = `<option value="">โหลดไม่สำเร็จ</option>`;
   }
 }
 
-async function loadExamYears() {
-  const select = document.getElementById("year-select");
-  if (!select) return;
+// ═══════════════════════════════════════════
+// Papers as Cards (ชุดข้อสอบย้อนหลัง)
+// ═══════════════════════════════════════════
+async function loadPapersAsCards() {
+  const grid = document.getElementById("papers-grid");
+  const empty = document.getElementById("papers-empty");
+  if (!grid) return;
+
   try {
-    const { data, error } = await withRetry(
-      () => sb
-        .from("exam_years")
-        .select("id, label")
-        .eq("is_active", true)
-        .order("year", { ascending: false }),
-      { operationName: "loadExamYears" }
-    );
+    const { data, error } = await sb
+      .from("v_papers_summary")
+      .select("id, code, label, year, description, active_question_count, is_active")
+      .eq("is_active", true)
+      .gt("active_question_count", 0)
+      .order("year", { ascending: false })
+      .order("code", { ascending: true })
+      .limit(12);
+
     if (error) throw error;
 
-    select.innerHTML = "";
+    grid.innerHTML = "";
+
     if (!data || data.length === 0) {
-      select.innerHTML = `<option value="">ยังไม่มีข้อมูลปี</option>`;
+      grid.classList.add("hidden");
+      empty?.classList.remove("hidden");
+      console.log("[dashboard] ไม่มี papers");
       return;
     }
-    data.forEach((row) => {
-      const option = document.createElement("option");
-      option.value = row.id;
-      option.textContent = row.label;
-      select.appendChild(option);
+
+    data.forEach((paper) => {
+      grid.appendChild(buildPaperCard(paper));
     });
-    console.log("[dashboard] โหลดปีแล้ว:", data.length, "รายการ");
+
+    console.log("[dashboard] โหลด papers:", data.length, "ชุด");
   } catch (err) {
-    console.error("[dashboard] loadExamYears error:", err);
-    select.innerHTML = `<option value="">โหลดไม่สำเร็จ</option>`;
+    console.error("[dashboard] loadPapers error:", err);
+    grid.innerHTML = "";
+    if (empty) empty.classList.remove("hidden");
   }
 }
 
 // ═══════════════════════════════════════════
-// Auto-init — รอ DOM พร้อมก่อน
+// Build paper card
+// ═══════════════════════════════════════════
+function buildPaperCard(paper) {
+  const card = document.createElement("div");
+  card.className = "paper-card";
+  card.setAttribute("role", "button");
+  card.setAttribute("tabindex", "0");
+  card.setAttribute("aria-label", `เริ่มทำชุด ${paper.label || paper.code}`);
+
+  // ─── Top row (icon + year) ───
+  const top = document.createElement("div");
+  top.className = "paper-card-top";
+
+  const icon = document.createElement("div");
+  icon.className = "paper-card-icon";
+  icon.textContent = "📝";
+
+  const year = document.createElement("span");
+  year.className = "paper-card-year";
+  year.textContent = paper.year;
+
+  top.appendChild(icon);
+  top.appendChild(year);
+  card.appendChild(top);
+
+  // ─── Label ───
+  const label = document.createElement("p");
+  label.className = "paper-card-label";
+  label.textContent = paper.label || paper.code;
+  card.appendChild(label);
+
+  // ─── Description ───
+  if (paper.description) {
+    const desc = document.createElement("p");
+    desc.className = "paper-card-desc";
+    desc.textContent = paper.description;
+    card.appendChild(desc);
+  }
+
+  // ─── Meta (count + arrow) ───
+  const meta = document.createElement("div");
+  meta.className = "paper-card-meta";
+
+  const count = document.createElement("span");
+  count.className = "paper-card-count";
+
+  const countBold = document.createElement("b");
+  countBold.textContent = String(paper.active_question_count);
+
+  count.appendChild(countBold);
+  count.appendChild(document.createTextNode(" ข้อ"));
+
+  const arrow = document.createElement("span");
+  arrow.className = "paper-card-arrow";
+  arrow.textContent = "→";
+
+  meta.appendChild(count);
+  meta.appendChild(arrow);
+  card.appendChild(meta);
+
+  // ─── Click handler ───
+  const startExam = () => {
+    sessionStorage.setItem(
+      "examConfig",
+      JSON.stringify({
+        mode: "year",
+        examYearId: paper.id,
+        count: paper.active_question_count
+      })
+    );
+    window.location.href = "exam.html";
+  };
+
+  card.addEventListener("click", startExam);
+  card.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      startExam();
+    }
+  });
+
+  return card;
+}
+
+// ═══════════════════════════════════════════
+// Auto-init
 // ═══════════════════════════════════════════
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initDashboard);
