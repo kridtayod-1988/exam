@@ -3,8 +3,8 @@
 //
 // การใช้งาน:
 //   npm i @supabase/supabase-js
-//   export SUPABASE_URL="https://xxxx.supabase.co"
-//   export SUPABASE_SERVICE_ROLE_KEY="eyJ..."        # ห้าม commit ลง git
+//   export SUPABASE_URL=""
+//   export SUPABASE_SERVICE_ROLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndlZmdyZWF2YXpwZmN0YXlqbm1wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwOTk1MjMsImV4cCI6MjEwNTY3NTUyM30.XcBAvQ2z66STZj31NlwZyjB7vk4ozax3yg58t6_c1eI"        # ห้าม commit ลง git
 //
 //   ตรวจสอบก่อน (dry-run, ไม่เขียนฐานข้อมูล):
 //     node scripts/classify-questions.mjs --source=db --report
