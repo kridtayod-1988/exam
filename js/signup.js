@@ -143,7 +143,7 @@ function setupPasswordMatch() {
 
 // ═══════════════════════════════════════════
 // Checkbox → enable/disable ปุ่ม
-// ═══════════════════════════════════════════
+// ═══════��═══════════════════════════════════
 function setupCheckbox() {
   const checkbox = document.getElementById("signup-agree-checkbox");
   const btn = document.getElementById("signup-step1-btn");
@@ -238,13 +238,14 @@ async function handleConfirmSignup() {
   try {
     const { email, password, displayName } = pendingSignupData;
 
-    const { data, error } = await sb.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { display_name: displayName }
-      }
-    });
+    const { data, error } = await withRetry(
+      () => sb.auth.signUp({
+        email,
+        password,
+        options: { data: { display_name: displayName } }
+      }),
+      { operationName: "signup" }
+    );
 
     if (error) throw error;
 
@@ -289,7 +290,7 @@ function showCheckEmailScreen(email) {
         <strong style="color:#b45309; word-break:break-all;">${escapeHtml(email)}</strong><br>
         กรุณากดลิงก์ในอีเมลเพื่อยืนยันตัวตน
       </p>
-      <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:12px; padding:0.85rem 1rem; font-size:0.82rem; color:#92400e; text-align:left; margin-bottom:1.25rem; line-height:1.55;">
+      <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:12px; padding:0.85rem 1rem; font-size:0.82rem; color:#92400e; text-align:left; margin-bottom:1.25rem; line-height:1.5;">
         💡 <b>ไม่พบอีเมล?</b> ตรวจสอบโฟลเดอร์ Spam / Junk หรือรออีก 1-2 นาที
       </div>
       <a href="login.html" class="login-submit-btn" style="display:inline-flex; text-decoration:none; width:100%;">
