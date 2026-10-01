@@ -25,9 +25,9 @@
 
   <main class="container" style="padding: 2rem 1.25rem 3rem;">
 
-    <!-- Level / EXP widget -->
+    <!-- ═══ Level / EXP widget ═══ -->
     <div class="card fade-up mb-4" style="padding:1.5rem 1.75rem;">
-      <div class="flex items-center justify-between mb-2" style="flex-wrap:wrap;gap:0.75rem;">
+      <div class="flex items-center justify-between mb-2" style="flex-wrap:wrap; gap:0.75rem;">
         <div class="flex items-center gap-2">
           <div class="level-badge">
             <span>LV.</span><span id="level-num" class="lv-num">1</span>
@@ -44,7 +44,7 @@
     <h1 class="mb-1">เลือกภารกิจ</h1>
     <p class="text-secondary mb-4">เลือกรูปแบบการฝึกที่เหมาะกับคุณ — ทุกข้อที่ตอบถูกคือ EXP</p>
 
-    <!-- โหมดข้อสอบจริง 100 ข้อ -->
+    <!-- ═══ โหมดข้อสอบจริง 100 ข้อ ═══ -->
     <div class="card mode-card fade-up fade-up-1 mb-3">
       <div class="mode-icon">📝</div>
       <div class="mode-info">
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <!-- โหมดแยกหมวดหมู่ -->
+    <!-- ═══ โหมดแยกหมวดหมู่ ═══ -->
     <div class="card fade-up fade-up-2 mb-3" style="padding:1.75rem;">
       <div class="flex items-center gap-2 mb-3">
         <span style="font-size:1.75rem;">📚</span>
@@ -78,29 +78,28 @@
       </button>
     </div>
 
-    <!-- โหมดแยกปี -->
+    <!-- ═══ ชุดข้อสอบย้อนหลัง (Cards) ═══ -->
     <div class="card fade-up fade-up-3" style="padding:1.75rem;">
       <div class="flex items-center gap-2 mb-3">
         <span style="font-size:1.75rem;">📅</span>
         <div>
-          <div class="mode-title" style="font-size:1.05rem;">ฝึกตามปีข้อสอบ</div>
-          <div class="text-secondary text-sm">เลือกปีเพื่อฝึกข้อสอบปีนั้นๆ</div>
+          <div class="mode-title" style="font-size:1.05rem;">ชุดข้อสอบย้อนหลัง</div>
+          <div class="text-secondary text-sm">เลือกชุดข้อสอบที่ต้องการฝึก</div>
         </div>
       </div>
 
-      <div class="form-group mb-0">
-        <label class="form-label">ปีข้อสอบ</label>
-        <select id="year-select" class="form-select">
-          <option value="">กำลังโหลด...</option>
-        </select>
+      <div id="papers-grid" class="papers-grid">
+        <div class="paper-card-skeleton"></div>
+        <div class="paper-card-skeleton"></div>
+        <div class="paper-card-skeleton"></div>
       </div>
 
-      <button id="start-year-exam-btn" class="btn btn-outline btn-full mt-3">
-        เริ่มฝึกตามปีข้อสอบ
-      </button>
+      <p id="papers-empty" class="hidden text-secondary text-sm text-center" style="padding:1.5rem;">
+        ยังไม่มีชุดข้อสอบย้อนหลัง
+      </p>
     </div>
 
-    <!-- สถิติย่อ -->
+    <!-- ═══ สถิติย่อ ═══ -->
     <div class="grid-3 mt-4">
       <div class="card stat-card fade-up">
         <div class="stat-icon">🎮</div>
@@ -112,7 +111,7 @@
         <p id="stat-best-score" class="stat-value">-</p>
         <p class="stat-label">คะแนนดีที่สุด</p>
       </div>
-      <div class="card stat-card fade-up" style="display:flex;flex-direction:column;justify-content:center;">
+      <div class="card stat-card fade-up" style="display:flex; flex-direction:column; justify-content:center;">
         <a href="profile.html" class="btn btn-ghost btn-sm">ดูประวัติทั้งหมด →</a>
       </div>
     </div>
